@@ -8,15 +8,9 @@
 </head>
 <body>
 <script>
-const t = TrelloPowerUp.iframe();
-
 window.TrelloPowerUp.initialize({
   "board-buttons": function(t, options) {
     return [{
-      icon: {
-        dark: "https://cdn-icons-png.flaticon.com/512/1828/1828817.png",
-        light: "https://cdn-icons-png.flaticon.com/512/1828/1828817.png"
-      },
       text: "Markaya Git",
       callback: function(t) {
         return t.popup({
