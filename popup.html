@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Markaya Git</title>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 14px;
+      background: #fff;
+      color: #172b4d;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border: 1px solid #dfe1e6;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #172b4d;
+    }
+
+    .item:hover {
+      background: #f1f2f4;
+    }
+
+    .empty {
+      padding: 12px;
+      color: #6b778c;
+    }
+  </style>
+</head>
+<body>
+
+<input id="search" type="text" placeholder="Marka ara...">
+<div id="list"></div>
+
+<script>
+const t = TrelloPowerUp.iframe();
+
+const RESERVED = new Set([
+  "markalar",
+  "🔥 bugün yapılacaklar",
+  "🔴 geciken işler",
+  "✅ tamamlanan işler"
+]);
+
+const normalize = (value) =>
+  String(value || "").trim().toLocaleLowerCase("tr-TR");
+
+let brands = [];
+
+function render(filter = "") {
+  const container = document.getElementById("list");
+  container.innerHTML = "";
+
+  const filtered = brands.filter((item) =>
+    normalize(item.name).includes(normalize(filter))
+  );
+
+  if (!filtered.length) {
+    container.innerHTML =
+      "<div class=\"empty\">Marka bulunamadı.</div>";
+    return;
+  }
+
+  filtered.forEach((item) => {
+    const button = document.createElement("button");
+    button.className = "item";
+    button.textContent = item.name;
+
+    button.addEventListener("click", async () => {
+      if (!item.cardId) {
+        alert("Bu listede açılabilecek kart yok.");
+        return;
+      }
+
+      await t.closePopup();
+      await t.showCard(item.cardId);
+    });
+
+    container.appendChild(button);
+  });
+}
+
+(async function init() {
+  try {
+    const lists = await t.lists("id", "name");
+    const cards = await t.cards("id", "idList", "name");
+
+    brands = lists
+      .filter((list) => !RESERVED.has(normalize(list.name)))
+      .map((list) => {
+        const firstCard = cards.find((card) => card.idList === list.id);
+
+        return {
+          id: list.id,
+          name: list.name,
+          cardId: firstCard ? firstCard.id : null
+        };
+      })
+      .sort((a, b) =>
+        a.name.localeCompare(b.name, "tr", {
+          sensitivity: "base"
+        })
+      );
+
+    render();
+  } catch (error) {
+    document.getElementById("list").innerHTML =
+      "<div class=\"empty\">Listeler yüklenemedi.</div>";
+    console.error(error);
+  }
+})();
+
+document.getElementById("search").addEventListener("input", (event) => {
+  render(event.target.value);
+});
+</script>
+
+</body>
+</html>

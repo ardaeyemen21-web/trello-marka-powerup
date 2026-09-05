@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Markaya Git</title>
+  <script src="https://p.trellocdn.com/power-up.min.js"></script>
+</head>
+<body>
+<script>
+const t = TrelloPowerUp.iframe();
+
+window.TrelloPowerUp.initialize({
+  "board-buttons": function(t, options) {
+    return [{
+      icon: {
+        dark: "https://cdn-icons-png.flaticon.com/512/1828/1828817.png",
+        light: "https://cdn-icons-png.flaticon.com/512/1828/1828817.png"
+      },
+      text: "Markaya Git",
+      callback: function(t) {
+        return t.popup({
+          title: "Markaya Git",
+          url: "./popup.html",
+          height: 360
+        });
+      }
+    }];
+  }
+});
+</script>
+</body>
+</html>
